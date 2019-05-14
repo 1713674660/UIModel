@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.5">
+    <title>欢迎使用租房系统</title>
+    <script src="https://cdn.bootcss.com/vue/2.4.2/vue.min.js"></script>
+    <script src="https://cdn.bootcss.com/vue-router/2.7.0/vue-router.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="https://getbootstrap.com/docs/4.3/examples/sign-in/signin.css" rel="stylesheet">
+</head>
+
+<body class="text-center">
+
+    <div class="form-signin" id="main">
+        <img class="mb-4" src="images/png/房屋租赁信息.png" alt="" width="92" height="82">
+        <h1 class="h3 mb-3 font-weight-normal">请登录</h1>
+        <label for="inputEmail" class="sr-only">用户账号/用户名/电话号码</label>
+        <input type="email" id="inputEmail" class="form-control" placeholder="用户账号/用户名/电话号码" v-model="id" required
+            autofocus>
+        <label for="inputPassword" class="sr-only">密码</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="密码" v-model="pwd" required>
+        <div class="checkbox mb-3">
+            <label>
+                <input v-model="option" type="radio" name="remember-me" value="admin"> 管理员
+                <input v-model="option" type="radio" name="remember-me" value="landlord">房东
+                <input v-model="option" type="radio" name="remember-me" value="tenant"> 租客
+            </label>
+        </div>
+        <button type="button" class="btn btn-lg btn-primary btn-block" @click="handleLogin">登录</button>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleModalScrollable">
+            忘记密码？
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalScrollableTitle">找回密码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div v-if="!display">
+                            <form action="#" method="post">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <div class="input-group mb-3">
+                                            <input v-model="phone" type="text" class="form-control" placeholder="请输入手机号"
+                                                aria-label="Recipient's username" aria-describedby="basic-addon2"
+                                                required="required">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text" id="basic-addon2">
+                                                    <button type="button" class="btn btn-outline-primary"
+                                                        @click="sendPhone()">获取验证码</button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="form-inline">
+
+                                    <div class="input-group mb-3">
+                                        <input v-model="code" type="text" class="form-control" placeholder="请输入验证码"
+                                            aria-label="Recipient's code" aria-describedby="basic-addon3"
+                                            required="required">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon3">
+                                                <button type="button" class="btn btn-outline-primary"
+                                                    @click="checkCode()">身份验证</button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </form>
+                        </div>
+
+                        <div v-if="display">
+                            <div class="form-group">
+                                <label for="userId">请输入用户账号</label>
+                                <input v-model="userId" type="text" class="form-control" id="userId" placeholder="用户账号"
+                                    required="required">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPwd1">请输入新密码</label>
+                                <input v-model="newPwd1" type="password" class="form-control" id="newPwd1"
+                                    placeholder="新密码" required="required">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPwd2">请确认新密码</label>
+                                <input v-model="newPwd2" type="password" class="form-control" id="newPwd2"
+                                    placeholder="新密码" required="required">
+                            </div>
+                            <div class="checkbox mb-3">
+                                <label>
+                                    <input v-model="optionPwd" type="radio" name="remember-me" value="admin"> 管理员
+                                    <input v-model="optionPwd" type="radio" name="remember-me" value="landlord">房东
+                                    <input v-model="optionPwd" type="radio" name="remember-me" value="tenant"> 租客
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-primary" @click="changePwd">确认</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleNewModalScrollable">
+            租户注册
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleNewModalScrollable" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalScrollableTitle1">租户注册</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+
+                        <div class="form-group">
+                            <input v-model="phone" type="text" class="form-control" id="exampleInputEmail"
+                                aria-describedby="emailHelp" placeholder="请输入手机号" required="required">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="newPwd1" type="password" class="form-control" id="exampleInputPassword"
+                                placeholder="请输入密码" required="required">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="newPwd2" type="password" class="form-control" id="exampleInputPassword2"
+                                placeholder="请确认密码" required="required">
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" @click="registerUser">确认</button>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleModalLong">
+            房东审核资料
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">房东审核资料</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input v-model="name" type="text" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="姓名：">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="newPwd1" type="password" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="密码：">
+
+                        </div>
+                        <div class="form-group">
+                            <input v-model="newPwd2" type="password" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="确认密码：">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="phone" type="text" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="电话：">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="addr" type="text" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="住址：">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="idcard" type="text" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="身份证：">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="papers" type="text" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="房产证：">
+                        </div>
+                        <div class="form-group">
+                            <input v-model="account" type="text" class="form-control" name="" id=""
+                                aria-describedby="helpId" placeholder="银行卡号：">
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" @click="registerExamine">确认</button>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <p class="mt-5 mb-3 text-muted">&copy; 2019-2021</p>
+    </div>
+
+    <script>
+        let main = new Vue({
+            el: '#main',
+            data: {
+                id: null,
+                pwd: '',
+                option: null,
+                display: false,
+                phone: '',
+                code: '',
+                optionPwd: null,
+                userId: null,
+                newPwd1: '',
+                newPwd2: '',
+                name: '',
+                addr: '',
+                idcard: '',
+                papers: '',
+                account: ''
+            },
+            methods: {
+                registerExamine: function () {
+                    if (this.newPwd1 === this.newPwd2) {
+
+                        axios.post("owner/1.0/insertExamine", {
+                            "name": this.name,
+                            "pwd": this.newPwd1,
+                            "phone": this.phone,
+                            "addr": this.addr,
+                            "idcard": this.idcard,
+                            "papers": this.papers,
+                            "account": this.account
+                        })
+                            .then((resp) => {
+                                if (resp.data === 1) {
+                                    window.alert("注册成功！");
+                                    this.name = '';
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                    this.phone = '';
+                                    this.addr = '';
+                                    this.idcard = '';
+                                    this.papers = '';
+                                    this.account = '';
+                                } else {
+                                    window.alert("注册失败！");
+                                    this.name = '';
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                    this.phone = '';
+                                    this.addr = '';
+                                    this.idcard = '';
+                                    this.papers = '';
+                                    this.account = '';
+                                }
+                            })
+                            .catch(() => {
+                                window.alert("注册失败！");
+                                this.name = '';
+                                this.newPwd1 = '';
+                                this.newPwd2 = '';
+                                this.phone = '';
+                                this.addr = '';
+                                this.idcard = '';
+                                this.papers = '';
+                                this.account = '';
+                            })
+
+                    } else {
+                        window.alert("密码不一致！请重新输入！");
+                        this.name = '';
+                        this.newPwd1 = '';
+                        this.newPwd2 = '';
+                        this.phone = '';
+                        this.addr = '';
+                        this.idcard = '';
+                        this.papers = '';
+                        this.account = '';
+                    }
+                },
+                registerUser: function () {
+                    if (this.newPwd1 === this.newPwd2) {
+
+                        axios.post("user/1.0/insertUser", {
+                            "phone": this.phone,
+                            "pwd": this.newPwd1
+                        })
+                            .then((resp) => {
+                                if (resp.data === 1) {
+                                    window.alert("注册成功！");
+                                    this.phone = '';
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                } else {
+                                    window.alert("注册失败！");
+                                    this.phone = '';
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                }
+                            })
+                            .catch(() => {
+                                window.alert("注册失败！");
+                                this.phone = '';
+                                this.newPwd1 = '';
+                                this.newPwd2 = '';
+                            })
+
+                    } else {
+                        window.alert("密码不一致！请重新输入！");
+                        this.phone = '';
+                        this.newPwd1 = '';
+                        this.newPwd2 = '';
+                    }
+                },
+                changePwd: function () {
+                    if (this.newPwd1 === this.newPwd2) {
+                        if ("admin" === this.optionPwd) {
+                            axios.post("admin/1.0/changePwd", {
+                                "id": parseInt(this.userId),
+                                "pwd": this.newPwd1
+                            })
+                                .then((resp) => {
+                                    if (resp.data === 1) {
+                                        window.alert("密码修改成功！");
+                                        this.userId = null;
+                                        this.newPwd1 = '';
+                                        this.newPwd2 = '';
+                                        this.optionPwd = '';
+                                        this.display = false;
+                                    }
+                                })
+                                .catch((resp) => {
+                                    window.alert("密码修改失败！");
+                                    this.userId = null;
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                    this.optionPwd = '';
+                                })
+                        } else if ("landlord" === this.optionPwd) {
+                            axios.post("owner/1.0/changePwd", {
+                                "id": parseInt(this.userId),
+                                "pwd": this.newPwd1
+                            })
+                                .then((resp) => {
+                                    if (resp.data === 1) {
+                                        window.alert("密码修改成功！");
+                                        this.userId = null;
+                                        this.newPwd1 = '';
+                                        this.newPwd2 = '';
+                                        this.optionPwd = '';
+                                        this.display = false;
+                                    }
+                                })
+                                .catch((resp) => {
+                                    window.alert("密码修改失败！");
+                                    this.userId = null;
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                    this.optionPwd = '';
+                                })
+                        } else if ("tenant" === this.optionPwd) {
+                            axios.post("user/1.0/changePwd", {
+                                "id": parseInt(this.userId),
+                                "pwd": this.newPwd1
+                            })
+                                .then((resp) => {
+                                    if (resp.data === 1) {
+                                        window.alert("密码修改成功！");
+                                        this.userId = null;
+                                        this.newPwd1 = '';
+                                        this.newPwd2 = '';
+                                        this.optionPwd = '';
+                                        this.display = false;
+                                    }
+                                })
+                                .catch((resp) => {
+                                    window.alert("密码修改失败！");
+                                    this.userId = null;
+                                    this.newPwd1 = '';
+                                    this.newPwd2 = '';
+                                    this.optionPwd = '';
+                                })
+                        }
+                    } else {
+                        window.alert("密码不一致！请重新输入！");
+                        this.userId = null;
+                        this.newPwd1 = '';
+                        this.newPwd2 = '';
+                        this.optionPwd = '';
+                    }
+                },
+                checkCode: function () {
+                    axios.post("message/checkCode", {
+                        "mobile": this.phone,
+                        "code": this.code
+                    })
+                        .then((resp) => {
+                            if (resp.data) {
+                                this.display = true;
+                                this.phone = '';
+                                this.code = '';
+                            }
+                        })
+                        .catch(() => {
+                            window.alert("校验失败！")
+                            this.code = '';
+                        })
+                },
+                sendPhone() {
+                    axios.get("message/sendMessage?mobile=" + this.phone)
+                        .then(function (resp) {
+                            window.alert(resp.data);
+                        })
+                        .catch(() => {
+                            window.alert("获取验证码失败！")
+                        })
+                },
+                handleLogin() {
+                    if ("tenant" === this.option) {
+                        //租客
+                        axios.post("user/1.0/findUser", {
+                            'id': parseInt(this.id), 'pwd': this.pwd
+                        }).then(function (resq) {
+                            if (resq.data === 1) {
+                                window.location = '/tenant.html'
+                                this.id = '';
+                                this.pwd = '';
+                                this.option = '';
+                            }
+                        }).catch(function () {
+                            console.log("传输失败");
+                            this.id = '';
+                            this.pwd = '';
+                            this.option = '';
+                        })
+                    } else if ("landlord" === this.option) {
+                        //房东
+                        axios.post("owner/1.0/findOwner", {
+                            "id": parseInt(this.id), "pwd": this.pwd
+                        })
+                            .then(function (req) {
+                                if (req.data === 1) {
+                                    window.location = "/landlord.html";
+                                    this.id = '';
+                                    this.pwd = '';
+                                    this.option = '';
+                                }
+                            })
+                            .catch(function () {
+                                console.log("登录失败");
+                                this.id = '';
+                                this.pwd = '';
+                                this.option = '';
+                            });
+                    } else if ("admin" === this.option) {
+                        axios.post("admin/1.0/login", {
+                            'id': parseInt(this.id), 'pwd': this.pwd
+                        }).then(function (resp) {
+                            console.log(resp.data);
+                            if (resp.data === 1) {
+                                window.location = '/admin.html';
+                                this.id = '';
+                                this.pwd = '';
+                                this.option = '';
+                            }
+                        })
+                            .catch(function () {
+                                console.log("管理员未知");
+                                this.id = '';
+                                this.pwd = '';
+                                this.option = '';
+                            })
+                    }
+                }
+            }
+        })
+
+
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
